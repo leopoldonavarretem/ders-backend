@@ -1,0 +1,19 @@
+{
+  "name": "wip-ders-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leopoldonavarretem/wip-ders-backend.git"
+  },
+  "author": "Leopoldo Navarrete",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leopoldonavarretem/wip-ders-backend/issues"
+  },
+  "homepage": "https://github.com/leopoldonavarretem/wip-ders-backend#readme"
+}
