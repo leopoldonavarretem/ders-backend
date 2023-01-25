@@ -19,7 +19,7 @@ router.patch('/', async (req, res) => {
         const {newPassword, newName, newAddress} = req.body;
         await userDao.editUserInformation(tokenPayload.username, newPassword, newName, newAddress);
 
-        res.send({"message": "success"});
+        res.send({"message": "Information updated successfully."});
     } catch (err) {
         if (err.name === 'JsonWebTokenError') {
             res.status(400);
@@ -39,9 +39,45 @@ router.patch('/', async (req, res) => {
 
 });
 
-router.get('/tickets', (req, res) => {
+//This route allows users to retrieve their tickets.
+router.get('/tickets', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the GET /tickets route."});
+    try {
+        const authorizationHeader = req.headers.authorization;
+        const token = authorizationHeader.split(" ")[1];
+        const tokenPayload = await jwtUtil.verifyTokenAndReturnPayload(token);
+        const {ticketId} = req.query;
+
+        if (ticketId) {
+            const data = await ticketDao.retrieveTicketById(ticketId);
+            if (data.Item.username !== tokenPayload.username) {
+                res.send({"message": "Not authorized to view this ticket."});
+            } else {
+                res.send({data});
+
+            }
+
+        } else {
+             const data = await ticketDao.retrieveTicketsByEmployee(tokenPayload.username);
+            res.send({data})
+        }
+    } catch (err) {
+        if (err.name === 'JsonWebTokenError') {
+            res.status(400);
+            res.send({
+                "message": "Invalid JWT"
+            });
+        } else if (err.name === 'TypeError') {
+            res.status(400);
+            res.send({
+                "message": "No authorization header provided"
+            });
+        } else {
+            res.status(500);
+        }
+    }
+
+
 });
 
 //This route allows users to submit a ticket.
@@ -72,7 +108,7 @@ router.post('/tickets', async (req, res) => {
                 "message": "Type must be either food, travel, lodging or other."
             });
         } else {
-            await ticketDao.submitTicket(amount, description, type, title, tokenPayload.username);
+            await ticketDao.submitTicket(amount, description, type, title, tokenPayload.username, tokenPayload.employeeName);
 
             res.send({"message": "Ticket successfully created."});
         }
@@ -93,11 +129,6 @@ router.post('/tickets', async (req, res) => {
             res.status(500);
         }
     }
-});
-
-router.get('/tickets/:ticketId', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the GET /tickets/:ticketId details route."});
 });
 
 module.exports = router;

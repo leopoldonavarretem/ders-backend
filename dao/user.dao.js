@@ -18,12 +18,13 @@ function retrieveUser(username) {
 }
 
 //Function register a user.
-function registerUser(username, password) {
+function registerUser(username, password, name) {
     return docClient.put({
         TableName: "ders-users",
         Item: {
             "username": username,
             "password": password,
+            "employeeName": name,
             "role": "employee"
         }
     }).promise();
@@ -38,7 +39,7 @@ function editUserInformation(username, newPassword, newName, newAddress) {
         UpdateExpression: 'set #a = :value1, #b = :value2, #c = :value3',
         ExpressionAttributeNames: {
             "#a": 'password',
-            "#b": 'name',
+            "#b": 'employeeName',
             "#c": "address"
         },
         ExpressionAttributeValues: {

@@ -9,7 +9,8 @@ require('../config/dynamo.config');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 //Function to submit a ticket.
-function submitTicket(amount, description, type, title, username) {
+function submitTicket(amount, description, type, title, username, name) {
+    const date = new Date()
     return docClient.put({
         TableName: "ders-tickets",
         Item: {
@@ -19,11 +20,53 @@ function submitTicket(amount, description, type, title, username) {
             "description": description,
             "type": type,
             "status": "pending",
-            "employee": username
+            "employeeName": name,
+            "username": username,
+            "dateSubmitted": date.toUTCString()
         }
     }).promise();
 }
 
+function retrieveTicketsByCategory(category) {
+    return docClient.query({
+        TableName: 'ders-tickets',
+        IndexName: 'type-index',
+        KeyConditionExpression: '#a = :value',
+        ExpressionAttributeNames: {
+            '#a': 'type'
+        },
+        ExpressionAttributeValues: {
+            'value': category
+        }
+    }).promise();
+}
+
+//Function to retrieve an individual ticket.
+function retrieveTicketById(ticketId) {
+    return docClient.get({
+        TableName: 'ders-tickets',
+        Key: {
+            'ticket_id': ticketId
+        }
+    }).promise();
+}
+
+function retrieveTicketsByEmployee(username){
+    return docClient.scan({
+        TableName: 'ders-tickets',
+        FilterExpression: '#a = :value',
+        ExpressionAttributeNames: {
+            '#a': "username"
+        },
+        ExpressionAttributeValues: {
+            ':value': username
+        }
+    }).promise()
+}
+
 module.exports = {
-    submitTicket
+    submitTicket,
+    retrieveTicketsByCategory,
+    retrieveTicketById,
+    retrieveTicketsByEmployee
 };
