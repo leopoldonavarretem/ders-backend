@@ -9,7 +9,7 @@ router.post('/signup', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
 
     //HELP: Should validation happen here or at the DAO?
-    const username = req.body.username;
+    const username = req.body.username.toLowerCase();
     const password = req.body.password;
 
     //TODO: Add regex
@@ -43,11 +43,11 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
 
-    const username = req.body.username;
+    const username = req.body.username.toLowerCase();
     const password = req.body.password;
 
     const data = await userDao.retrieveUser(username);
-    console.log(data);
+
 
     if (data.Item) {
         if (data.Item.password === password) {
