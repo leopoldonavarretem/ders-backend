@@ -1,8 +1,8 @@
 //Imports
 const AWS = require('aws-sdk');
 
-//AWS Config
-require('../config/dynamo.config')
+//AWS config
+require('../config/dynamo.config');
 
 //Instantiate docClient.
 const docClient = new AWS.DynamoDB.DocumentClient();
@@ -29,7 +29,30 @@ function registerUser(username, password) {
     }).promise();
 }
 
+function editUserInformation(username, newPassword, newName, newAddress) {
+    return docClient.update({
+        TableName: 'ders-users',
+        Key: {
+            username
+        },
+        UpdateExpression: 'set #a = :value1, #b = :value2, #c = :value3',
+        ExpressionAttributeNames: {
+            "#a": 'password',
+            "#b": 'name',
+            "#c": "address"
+        },
+        ExpressionAttributeValues: {
+            ":value1": newPassword,
+            ":value2": newName,
+            ":value3": newAddress
+        },
+
+        ReturnValues: "UPDATED_NEW"
+    }).promise();
+}
+
 module.exports = {
     retrieveUser,
-    registerUser
+    registerUser,
+    editUserInformation
 };

@@ -10,16 +10,12 @@ const managerRoutes = require('./manager.routes');
 
 //Routes imports
 router.get('/', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`)
+    logger.info(`${req.method} received to ${req.url}.`);
     const introMessage = {
-        message: 'Welcome to the DERS server.',
-        auth: "GET /auth to create or log in to an account.",
-        admin: 'GET /admin to manage employee records.',
-        manager: 'GET /manager to see administer tickets..',
-        employee: "GET /employee to submit or view tickets."
-    }
+        message: 'Welcome to the DERS server.'
+    };
 
-    res.json(introMessage)
+    res.json(introMessage);
 });
 
 router.use('/auth', authRoutes);
@@ -29,8 +25,8 @@ router.use('/manager', managerRoutes);
 
 //Route not found.
 router.use((req, res) => {
-    logger.warn(`${req.method} received to ${req.url}.`)
-    res.status(404).send({errorMessage: "This route does not exist."})
+    logger.warn(`${req.method} received to ${req.url}.`);
+    res.status(404).send({errorMessage: "This route does not exist."});
 });
 
 module.exports = router;
