@@ -1,29 +1,67 @@
 //Imports
 const router = require('express').Router();
 const logger = require('../config/logger.config');
-
-//Main route
-router.get('/', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`);
-    const authIntroMessage = {
-        message: "You have accessed the /auth endpoint.",
-        signup: "POST /auth/signup to create an account.",
-        login: "POST /auth/login to log in to your account."
-    }
-    res.send(authIntroMessage)
-})
+const jwtUtil = require('../utility/jwt.util');
+const userDao = require('../dao/user.dao');
 
 //Route to create an account.
-router.post('/signup', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`)
-    res.send({message: "You have accessed the signup endpoint."})
-})
+router.post('/signup', async (req, res) => {
+    logger.info(`${req.method} received to ${req.url}.`);
+
+    //HELP: Should validation happen here or at the DAO?
+    const username = req.body.username;
+    const password = req.body.password;
+
+    //TODO: Add regex
+    if (!username || !password) {
+        res.status(400);
+        res.send({
+            "message": "Please input a valid username or password."
+        });
+        //HELP: Code keeps executing after I send a response, had to make everything into an ifElse.
+    } else {
+        //HELP: How to add logger to log in errors.
+        const data = await userDao.retrieveUser(username);
+        if (data.Item) {
+            res.status(400);
+            res.send({
+                'message': "Username already exists."
+            });
+        } else {
+            //TODO: Add BCRYPT.
+            await userDao.registerUser(username, password);
+
+            res.send({
+                "message": "User successfully registered."
+            });
+        }
+    }
+
+});
 
 //Route to log in to account.
-router.post('/login', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`)
-    res.send({message: "you have accessed the login endpoint.'"})
-})
+router.post('/login', async (req, res) => {
+    logger.info(`${req.method} received to ${req.url}.`);
 
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const data = await userDao.retrieveUser(username);
+    console.log(data);
+
+    if (data.Item) {
+        if (data.Item.password === password) {
+            res.send({
+                "message": 'Successful login!',
+                "token": jwtUtil.createToken(data.Item.username, data.Item.role)
+            });
+        } else {
+            res.status(400);
+            res.send({
+                "message": "Invalid credentials."
+            });
+        }
+    }
+});
 
 module.exports = router;
