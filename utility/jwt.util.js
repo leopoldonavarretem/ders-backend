@@ -14,7 +14,6 @@ function createToken(username, role) {
 //This function returns a promise that contains the payload when the promise is solved.
 function verifyTokenAndReturnPayload(token) {
     jwt.verify = Promise.promisify(jwt.verify);
-
     return jwt.verify(token, process.env.JWTSECRET);
 }
 
