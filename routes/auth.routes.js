@@ -49,7 +49,6 @@ router.post('/login', async (req, res) => {
 
     const data = await userDao.retrieveUser(username);
 
-
     if (data.Item) {
         if (data.Item.password === password) {
             res.send({
