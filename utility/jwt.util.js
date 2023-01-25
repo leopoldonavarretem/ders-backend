@@ -3,11 +3,12 @@ const jwt = require('jsonwebtoken');
 const Promise = require('bluebird');
 
 //This will store the username and role into the token that we create.
-function createToken(username, role) {
+function createToken(username, role, employeeName) {
     return jwt.sign({
         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 3),
         'username': username,
-        "role": role
+        "role": role,
+        "employeeName": employeeName
     }, process.env.JWTSECRET);
 }
 
