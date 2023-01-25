@@ -11,12 +11,13 @@ router.post('/signup', async (req, res) => {
     //HELP: Should validation happen here or at the DAO?
     const username = req.body.username.toLowerCase();
     const password = req.body.password;
+    const name = req.body.name;
 
     //TODO: Add regex
-    if (!username || !password) {
+    if (!username || !password || !name) {
         res.status(400);
         res.send({
-            "message": "Please input a valid username or password."
+            "message": "Please input a valid name, password or name."
         });
         //HELP: Code keeps executing after I send a response, had to make everything into an ifElse.
     } else {
@@ -29,7 +30,7 @@ router.post('/signup', async (req, res) => {
             });
         } else {
             //TODO: Add BCRYPT.
-            await userDao.registerUser(username, password);
+            await userDao.registerUser(username, password, name);
 
             res.send({
                 "message": "User successfully registered."
@@ -48,12 +49,11 @@ router.post('/login', async (req, res) => {
 
     const data = await userDao.retrieveUser(username);
 
-
     if (data.Item) {
         if (data.Item.password === password) {
             res.send({
                 "message": 'Successful login!',
-                "token": jwtUtil.createToken(data.Item.username, data.Item.role)
+                "token": jwtUtil.createToken(data.Item.username, data.Item.role, data.Item.employeeName)
             });
         } else {
             res.status(400);
