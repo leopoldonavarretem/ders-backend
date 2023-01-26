@@ -8,32 +8,6 @@ const isEmployee = require('../middleware/isEmployee');
 
 //This route allows users to change their information.
 //TODO: Users can add a profile picture.
-router.patch('/', getUserInfo, isEmployee, async (req, res) => {
-    logger.info(`${req.method} received to ${req.url}`);
-    try {
-        //TODO: Add verification.
-        const {newPassword, newName, newAddress} = req.body;
-        await userDao.editUserInformation(req.user.username, newPassword, newName, newAddress);
-        res.send({"message": "Information updated successfully."});
-
-    } catch (err) {
-        if (err.name === 'JsonWebTokenError') {
-            res.status(400);
-            res.send({
-                "message": "Invalid JWT"
-            });
-        } else if (err.name === 'TypeError') {
-            res.status(400);
-            res.send({
-                "message": "No authorization header provided"
-            });
-        } else {
-            res.status(500);
-        }
-    }
-
-
-});
 
 //This route allows users to retrieve their tickets.
 router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {

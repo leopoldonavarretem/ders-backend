@@ -7,6 +7,7 @@ const authRoutes = require('./auth.routes');
 const adminRoutes = require('./admin.routes');
 const employeeRoutes = require('./employee.routes');
 const managerRoutes = require('./manager.routes');
+const userRoutes = require('./user.routes');
 
 //Routes imports
 router.get('/', (req, res) => {
@@ -22,6 +23,7 @@ router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/employee', employeeRoutes);
 router.use('/manager', managerRoutes);
+router.use('/user', userRoutes);
 
 //Route not found.
 router.use((req, res) => {
