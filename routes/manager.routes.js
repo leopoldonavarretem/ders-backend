@@ -66,4 +66,12 @@ router.patch('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
     }
 });
 
+        }
+
+
+    } catch (err) {
+        console.log(err);
+    }
+});
+
 module.exports = router;
