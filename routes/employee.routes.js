@@ -1,25 +1,21 @@
-//Imports
+//Package Imports
 const router = require('express').Router();
 const logger = require('../config/logger.config');
-const jwtUtil = require('../utility/jwt.util');
 const userDao = require("../dao/user.dao");
 const ticketDao = require('../dao/ticket.dao');
+const getUserInfo = require('../middleware/getUserInfo');
+const isEmployee = require('../middleware/isEmployee');
 
 //This route allows users to change their information.
 //TODO: Users can add a profile picture.
-router.patch('/', async (req, res) => {
+router.patch('/', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}`);
     try {
-        //HELP: Why can it be done in one line?
-        const authorizationHeader = req.headers.authorization;
-        const token = authorizationHeader.split(" ")[1];
-        const tokenPayload = await jwtUtil.verifyTokenAndReturnPayload(token);
-
         //TODO: Add verification.
         const {newPassword, newName, newAddress} = req.body;
-        await userDao.editUserInformation(tokenPayload.username, newPassword, newName, newAddress);
-
+        await userDao.editUserInformation(req.user.username, newPassword, newName, newAddress);
         res.send({"message": "Information updated successfully."});
+
     } catch (err) {
         if (err.name === 'JsonWebTokenError') {
             res.status(400);
@@ -40,31 +36,28 @@ router.patch('/', async (req, res) => {
 });
 
 //This route allows users to retrieve their tickets.
-router.get('/tickets', async (req, res) => {
+router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     try {
-        const authorizationHeader = req.headers.authorization;
-        const token = authorizationHeader.split(" ")[1];
-        const tokenPayload = await jwtUtil.verifyTokenAndReturnPayload(token);
         //TODO: Maybe move the ticket Id as its own endpoint
         const {ticketId} = req.query;
         const {type} = req.query;
 
         if (ticketId) {
             const data = await ticketDao.retrieveTicketById(ticketId);
-            if (data.Item.username !== tokenPayload.username) {
+            if (data.Item.username !== req.user.username) {
                 res.send({"message": "Not authorized to view this ticket."});
             } else {
                 res.send({data});
 
             }
 
-        }else if (type){
-            const data = await ticketDao.retrieveTicketsByCategory(type, tokenPayload.username)
-            res.send(data)
+        } else if (type) {
+            const data = await ticketDao.retrieveTicketsByCategory(type, req.user.username);
+            res.send(data);
         } else {
-             const data = await ticketDao.retrieveTicketsByEmployee(tokenPayload.username);
-            res.send(data)
+            const data = await ticketDao.retrieveTicketsByEmployee(req.user.username);
+            res.send(data);
         }
     } catch (err) {
         if (err.name === 'JsonWebTokenError') {
@@ -86,14 +79,9 @@ router.get('/tickets', async (req, res) => {
 });
 
 //This route allows users to submit a ticket.
-router.post('/tickets', async (req, res) => {
+router.post('/tickets', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     try {
-        const authorizationHeader = req.headers.authorization;
-        const token = authorizationHeader.split(" ")[1];
-        const tokenPayload = await jwtUtil.verifyTokenAndReturnPayload(token);
-
-
         const {amount, description, title} = req.body;
         const type = req.body.type.toLowerCase();
 
@@ -113,7 +101,7 @@ router.post('/tickets', async (req, res) => {
                 "message": "Type must be either food, travel, lodging or other."
             });
         } else {
-            await ticketDao.submitTicket(amount, description, type, title, tokenPayload.username, tokenPayload.employeeName);
+            await ticketDao.submitTicket(amount, description, type, title, req.user.username, req.user.employeeName);
 
             res.send({"message": "Ticket successfully created."});
         }

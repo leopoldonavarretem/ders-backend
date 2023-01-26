@@ -2,9 +2,11 @@
 const router = require('express').Router();
 const logger = require('../config/logger.config');
 const ticketDao = require('../dao/ticket.dao');
+const getUserInfo = require('../middleware/getUserInfo');
+const isManager = require('../middleware/isManager');
 
 //This route allows managers to view tickets
-router.get('/tickets', async (req, res) => {
+router.get('/tickets', getUserInfo, isManager, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     const status = req.query.status;
 
@@ -24,7 +26,7 @@ router.get('/tickets', async (req, res) => {
 
 });
 
-router.get('/tickets/:ticketId', async (req, res) => {
+router.get('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     const ticketId = req.params['ticketId'];
 
@@ -37,11 +39,10 @@ router.get('/tickets/:ticketId', async (req, res) => {
     }
 });
 
-router.patch('/tickets/:ticketId', async (req, res) => {
+router.patch('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     const ticketId = req.params['ticketId'].toLowerCase();
     const status = req.body.status;
-    console.log(status);
     try {
         if (status !== 'approved' && status !== 'denied') {
             res.status(400);
@@ -59,10 +60,7 @@ router.patch('/tickets/:ticketId', async (req, res) => {
                 await ticketDao.changeTicketStatus(ticketId, req.body.status);
                 res.send({"message": `Ticket has been ${status}.`});
             }
-
         }
-
-
     } catch (err) {
         console.log(err);
     }
