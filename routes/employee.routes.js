@@ -46,7 +46,9 @@ router.get('/tickets', async (req, res) => {
         const authorizationHeader = req.headers.authorization;
         const token = authorizationHeader.split(" ")[1];
         const tokenPayload = await jwtUtil.verifyTokenAndReturnPayload(token);
+        //TODO: Maybe move the ticket Id as its own endpoint
         const {ticketId} = req.query;
+        const {type} = req.query;
 
         if (ticketId) {
             const data = await ticketDao.retrieveTicketById(ticketId);
@@ -57,9 +59,12 @@ router.get('/tickets', async (req, res) => {
 
             }
 
+        }else if (type){
+            const data = await ticketDao.retrieveTicketsByCategory(type, tokenPayload.username)
+            res.send(data)
         } else {
              const data = await ticketDao.retrieveTicketsByEmployee(tokenPayload.username);
-            res.send({data})
+            res.send(data)
         }
     } catch (err) {
         if (err.name === 'JsonWebTokenError') {

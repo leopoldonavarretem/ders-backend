@@ -1,34 +1,71 @@
 //Imports
 const router = require('express').Router();
 const logger = require('../config/logger.config');
+const ticketDao = require('../dao/ticket.dao');
 
-//Main route
-router.get('/', (req, res) => {
+//This route allows managers to view tickets
+router.get('/tickets', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    const managerIntroMessage = {
-        message: "You have accessed the /manager endpoint.",
-        routes: [
-            "GET /manager/tickets to see pending tickets.",
-            "GET /manager/tickets/:ticketId to see and individual ticket.",
-            "PATCH /manager/tickets/:ticketId to approve or deny tickets."
-        ]
+    const status = req.query.status;
+
+    try {
+        if (status) {
+            const data = await ticketDao.retrieveTicketsByStatus(status);
+            res.send(data);
+        } else {
+            const data = await ticketDao.retrieveAllTickets();
+            res.send(data);
+        }
+
+    } catch (err) {
+        res.status(500);
+        res.send({"message": "Server error."});
     }
-    res.send(managerIntroMessage)
-})
 
-router.get('/tickets', (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the /manager/tickets route."});
 });
 
-router.get('/tickets/:ticketId', (req, res) => {
+router.get('/tickets/:ticketId', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the /manager/tickets/:ticketId route."});
+    const ticketId = req.params['ticketId'];
+
+    try {
+        const data = await ticketDao.retrieveTicketById(ticketId);
+        res.send(data);
+    } catch {
+        res.status(500);
+        res.send({"message": "Server error."});
+    }
 });
 
-router.patch('/tickets/:ticketId', (req, res) => {
+router.patch('/tickets/:ticketId', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the /manager/tickets/ticketId route."});
-})
+    const ticketId = req.params['ticketId'].toLowerCase();
+    const status = req.body.status;
+    console.log(status);
+    try {
+        if (status !== 'approved' && status !== 'denied') {
+            res.status(400);
+            res.send({
+                "message": "Please approve or deny ticket."
+            });
+        } else {
+            const data = await ticketDao.retrieveTicketById(ticketId);
+            if (data.Item.status !== "pending") {
+                res.status(400);
+                res.send({
+                    "message": "This ticket has already been denied or approved."
+                });
+            } else {
+                await ticketDao.changeTicketStatus(ticketId, req.body.status);
+                res.send({"message": `Ticket has been ${status}.`});
+            }
+
+        }
+
+
+    } catch (err) {
+        console.log(err);
+    }
+});
 
 module.exports = router;

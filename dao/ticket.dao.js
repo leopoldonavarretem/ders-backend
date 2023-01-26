@@ -10,7 +10,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 //Function to submit a ticket.
 function submitTicket(amount, description, type, title, username, name) {
-    const date = new Date()
+    const date = new Date();
     return docClient.put({
         TableName: "ders-tickets",
         Item: {
@@ -31,12 +31,26 @@ function retrieveTicketsByCategory(category) {
     return docClient.query({
         TableName: 'ders-tickets',
         IndexName: 'type-index',
-        KeyConditionExpression: '#a = :value',
+        KeyConditionExpression: '#a = :value1',
         ExpressionAttributeNames: {
             '#a': 'type'
         },
         ExpressionAttributeValues: {
-            'value': category
+            ':value1': category
+        }
+    }).promise();
+}
+
+function retrieveTicketsByStatus(status) {
+    return docClient.query({
+        TableName: 'ders-tickets',
+        IndexName: 'status-index',
+        KeyConditionExpression: '#a = :value1',
+        ExpressionAttributeNames: {
+            '#a': 'status'
+        },
+        ExpressionAttributeValues: {
+            ':value1': status
         }
     }).promise();
 }
@@ -51,7 +65,7 @@ function retrieveTicketById(ticketId) {
     }).promise();
 }
 
-function retrieveTicketsByEmployee(username){
+function retrieveTicketsByEmployee(username) {
     return docClient.scan({
         TableName: 'ders-tickets',
         FilterExpression: '#a = :value',
@@ -61,6 +75,29 @@ function retrieveTicketsByEmployee(username){
         ExpressionAttributeValues: {
             ':value': username
         }
+    }).promise();
+}
+
+function retrieveAllTickets() {
+    return docClient.scan({
+        TableName: 'ders-tickets',
+
+    }).promise();
+}
+
+function changeTicketStatus(ticketId, status){
+    return docClient.update({
+        TableName: 'ders-tickets',
+        Key: {
+            "ticket_id": ticketId
+        },
+        UpdateExpression: 'set #a = :value1',
+        ExpressionAttributeNames:{
+            "#a": 'status'
+        },
+        ExpressionAttributeValues: {
+            ':value1': status
+        }
     }).promise()
 }
 
@@ -68,5 +105,8 @@ module.exports = {
     submitTicket,
     retrieveTicketsByCategory,
     retrieveTicketById,
-    retrieveTicketsByEmployee
+    retrieveTicketsByEmployee,
+    retrieveAllTickets,
+    retrieveTicketsByStatus,
+    changeTicketStatus
 };
