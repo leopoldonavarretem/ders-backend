@@ -7,8 +7,20 @@ module.exports = async (req, res, next) => {
         return res.status(403).send({"errorMessage": "Please log in to continue."});
     }
 
-    //Saves the users information to the req.
-    const token = req.headers.authorization.split(" ")[1];
-    req.user = await jwtUtil.verifyTokenAndReturnPayload(token);
-    next();
+    try {
+        //Saves the users information to the req.
+        const token = req.headers.authorization.split(" ")[1];
+        req.user = await jwtUtil.verifyTokenAndReturnPayload(token);
+        next();
+    } catch (err) {
+        if (err.name === 'JsonWebTokenError') {
+            res.status(400);
+            res.send({
+                "message": "Invalid JWT"
+            });
+        } else {
+            res.status(500);
+            res.send({"serverError": "A server error has occurred."});
+        }
+    }
 };
