@@ -1,32 +1,17 @@
 //Package Imports
 const router = require('express').Router();
 const logger = require('../config/logger.config');
-const userDao = require("../dao/user.dao");
 const ticketDao = require('../dao/ticket.dao');
 const getUserInfo = require('../middleware/getUserInfo');
 const isEmployee = require('../middleware/isEmployee');
-
-//This route allows users to change their information.
-//TODO: Users can add a profile picture.
 
 //This route allows users to retrieve their tickets.
 router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     try {
-        //TODO: Maybe move the ticket Id as its own endpoint
-        const {ticketId} = req.query;
         const {type} = req.query;
 
-        if (ticketId) {
-            const data = await ticketDao.retrieveTicketById(ticketId);
-            if (data.Item.username !== req.user.username) {
-                res.send({"message": "Not authorized to view this ticket."});
-            } else {
-                res.send({data});
-
-            }
-
-        } else if (type) {
+        if (type) {
             const data = await ticketDao.retrieveTicketsByCategory(type, req.user.username);
             res.send(data);
         } else {
@@ -50,6 +35,18 @@ router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {
     }
 
 
+});
+
+//This route allows users to retrieve an individual ticket.
+router.get('/tickets/:ticketId', getUserInfo, isEmployee, async (req, res) => {
+    const data = await ticketDao.retrieveTicketById(req.params['ticketId']);
+    if (!data.Item) {
+        res.status(404).send({"errorMessage": "Ticket does not exist."});
+    } else if (data.Item.username !== req.user.username) {
+        res.send({"message": "Not authorized to view this ticket."});
+    } else {
+        res.send({data});
+    }
 });
 
 //This route allows users to submit a ticket.
