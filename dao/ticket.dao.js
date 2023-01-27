@@ -1,6 +1,5 @@
 //Imports
 const AWS = require('aws-sdk');
-const uuid = require('uuid');
 
 //AWS config
 require('../config/dynamo.config');
@@ -8,35 +7,55 @@ require('../config/dynamo.config');
 //Instantiate docClient.
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-//Function to submit a ticket.
-function submitTicket(amount, description, type, title, username, name) {
+function submitTicket(ticketId, amount, description, reimbursementType, title, username, name) {
     const date = new Date();
     return docClient.put({
         TableName: "ders-tickets",
         Item: {
             "title": title,
-            "ticket_id": uuid.v4(),
+            "ticketId": ticketId,
             "amount": amount,
             "description": description,
-            "type": type,
+            "reimbursementType": reimbursementType,
             "status": "pending",
             "employeeName": name,
             "username": username,
             "dateSubmitted": date.toUTCString()
         }
+
     }).promise();
 }
 
-function retrieveTicketsByCategory(category) {
+function retrieveTicketsByReimbursementType(reimbursementType, username) {
     return docClient.query({
         TableName: 'ders-tickets',
-        IndexName: 'type-index',
-        KeyConditionExpression: '#a = :value1',
+        IndexName: 'reimbursementType-index',
+        FilterExpression: '#C = :value2',
+        KeyConditionExpression: '#A = :value1',
         ExpressionAttributeNames: {
-            '#a': 'type'
+            '#A': 'reimbursementType',
+            '#C': 'username',
         },
         ExpressionAttributeValues: {
-            ':value1': category
+            ':value1': reimbursementType,
+            ':value2': username
+        }
+    }).promise();
+}
+
+function retrieveTicketsByStatusEmployee(status, username) {
+    return docClient.query({
+        TableName: 'ders-tickets',
+        IndexName: 'status-index',
+        FilterExpression: '#C = :value2',
+        KeyConditionExpression: '#A = :value1',
+        ExpressionAttributeNames: {
+            '#A': 'status',
+            '#C': 'username',
+        },
+        ExpressionAttributeValues: {
+            ':value1': status,
+            ':value2': username
         }
     }).promise();
 }
@@ -55,12 +74,11 @@ function retrieveTicketsByStatus(status) {
     }).promise();
 }
 
-//Function to retrieve an individual ticket.
 function retrieveTicketById(ticketId) {
     return docClient.get({
         TableName: 'ders-tickets',
         Key: {
-            'ticket_id': ticketId
+            'ticketId': ticketId
         }
     }).promise();
 }
@@ -85,28 +103,29 @@ function retrieveAllTickets() {
     }).promise();
 }
 
-function changeTicketStatus(ticketId, status){
+function changeTicketStatus(ticketId, status) {
     return docClient.update({
         TableName: 'ders-tickets',
         Key: {
             "ticket_id": ticketId
         },
         UpdateExpression: 'set #a = :value1',
-        ExpressionAttributeNames:{
+        ExpressionAttributeNames: {
             "#a": 'status'
         },
         ExpressionAttributeValues: {
             ':value1': status
         }
-    }).promise()
+    }).promise();
 }
 
 module.exports = {
     submitTicket,
-    retrieveTicketsByCategory,
+    retrieveTicketsByReimbursementType,
     retrieveTicketById,
     retrieveTicketsByEmployee,
     retrieveAllTickets,
     retrieveTicketsByStatus,
-    changeTicketStatus
+    changeTicketStatus,
+    retrieveTicketsByStatusEmployee
 };
