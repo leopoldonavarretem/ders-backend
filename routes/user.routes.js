@@ -14,19 +14,7 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
         res.send({"message": "Information updated successfully."});
 
     } catch (err) {
-        if (err.name === 'JsonWebTokenError') {
-            res.status(400);
-            res.send({
-                "message": "Invalid JWT"
-            });
-        } else if (err.name === 'TypeError') {
-            res.status(400);
-            res.send({
-                "message": "No authorization header provided"
-            });
-        } else {
-            res.status(500);
-        }
+        res.status(500);
     }
 });
 

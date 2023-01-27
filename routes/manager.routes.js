@@ -13,10 +13,10 @@ router.get('/tickets', getUserInfo, isManager, async (req, res) => {
     try {
         if (status) {
             const data = await ticketDao.retrieveTicketsByStatus(status);
-            res.send(data);
+            res.send(data.Items);
         } else {
             const data = await ticketDao.retrieveAllTickets();
-            res.send(data);
+            res.send(data.Items);
         }
 
     } catch (err) {
@@ -32,7 +32,7 @@ router.get('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
 
     try {
         const data = await ticketDao.retrieveTicketById(ticketId);
-        res.send(data);
+        res.send(data.Item);
     } catch {
         res.status(500);
         res.send({"message": "Server error."});
@@ -41,7 +41,7 @@ router.get('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
 
 router.patch('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    const ticketId = req.params['ticketId'].toLowerCase();
+    const ticketId = req.params['ticketId'];
     const status = req.body.status;
     try {
         if (status !== 'approved' && status !== 'denied') {

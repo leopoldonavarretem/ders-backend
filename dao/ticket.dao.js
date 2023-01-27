@@ -107,7 +107,7 @@ function changeTicketStatus(ticketId, status) {
     return docClient.update({
         TableName: 'ders-tickets',
         Key: {
-            "ticket_id": ticketId
+            "ticketId": ticketId
         },
         UpdateExpression: 'set #a = :value1',
         ExpressionAttributeNames: {

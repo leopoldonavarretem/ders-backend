@@ -9,7 +9,7 @@ router.post('/signup', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
 
     //HELP: Should validation happen here or at the DAO?
-    const username = req.body.username.toLowerCase();
+    const username = req.body.username;
     const password = req.body.password;
     const name = req.body.name;
 
@@ -30,7 +30,8 @@ router.post('/signup', async (req, res) => {
             });
         } else {
             //TODO: Add BCRYPT.
-            await userDao.registerUser(username, password, name);
+            const validatedUsername = username.toLowerCase()
+            await userDao.registerUser(validatedUsername, password, name);
 
             res.send({
                 "message": "User successfully registered."
@@ -44,24 +45,36 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
 
-    const username = req.body.username.toLowerCase();
+    const username = req.body.username;
     const password = req.body.password;
 
-    const data = await userDao.retrieveUser(username);
+    if (!username || !password) {
+        res.status(400);
+        res.send({"errorMessage": "Please input a username or password."});
+    } else {
+        const validatedUsername = username.toLowerCase()
+        const data = await userDao.retrieveUser(validatedUsername);
 
-    if (data.Item) {
-        if (data.Item.password === password) {
-            res.send({
-                "message": 'Successful login!',
-                "token": jwtUtil.createToken(data.Item.username, data.Item.role, data.Item.employeeName)
-            });
+        if (data.Item) {
+            if (data.Item.password === password) {
+                res.send({
+                    "message": 'Successful login!',
+                    "token": jwtUtil.createToken(data.Item.username, data.Item.role, data.Item.employeeName)
+                });
+            } else {
+                res.status(400);
+                res.send({"message": "Invalid credentials."});
+            }
+
         } else {
-            res.status(400);
-            res.send({
-                "message": "Invalid credentials."
-            });
+            res.status(404);
+            res.send({"loginError": "Invalid credentials."});
         }
+
+
     }
+
+
 });
 
 module.exports = router;
