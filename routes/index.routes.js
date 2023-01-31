@@ -12,11 +12,8 @@ const userRoutes = require('./user.routes');
 //Routes imports
 router.get('/', (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    const introMessage = {
-        message: 'Welcome to the DERS server.'
-    };
 
-    res.json(introMessage);
+    return res.send({message: "Welcome to the DERS server."});
 });
 
 router.use('/auth', authRoutes);
@@ -28,7 +25,7 @@ router.use('/user', userRoutes);
 //Route not found.
 router.use((req, res) => {
     logger.warn(`${req.method} received to ${req.url}.`);
-    res.status(404).send({errorMessage: "This route does not exist."});
+    return res.status(404).send({errorMessage: "This route does not exist."});
 });
 
 module.exports = router;

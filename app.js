@@ -1,7 +1,7 @@
 //Imports
 const express = require("express");
 
-//Creates an express Server.
+//Creates an express server
 const app = express();
 
 //Import server configurations

@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
         if (err.name === 'JsonWebTokenError') {
             res.status(400);
             res.send({
-                "message": "Invalid JWT"
+                "errorMessage": "Invalid JWT"
             });
         } else {
             res.status(500);
