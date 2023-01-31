@@ -14,7 +14,7 @@ router.post('/signup', async (req, res) => {
     const name = req.body.name;
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
 
-    if (!username || !password || !name) {
+    if (typeof username !== "string" || typeof password !== "string" || typeof name !== 'string') {
         res.status(400);
         return res.send({
             errorMessage: "Please input a valid name, password or name."
@@ -44,9 +44,10 @@ router.post('/signup', async (req, res) => {
                 message: "User successfully registered."
             });
         }
-    } catch {
+    } catch (err) {
         logger.error(`ERROR: ${req.method} received to ${req.url}.`);
-        return res.status(500).send({
+        res.status(500);
+        return res.send({
             serverError: "A server error has occurred."
         });
     }
@@ -59,27 +60,36 @@ router.post('/login', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
-    if (!username || !password) {
+    if (typeof username !== 'string' || typeof password !== 'string') {
         res.status(400);
         return res.send({errorMessage: 'Please input a valid username or password.'});
     }
 
     const validatedUsername = username.toLowerCase();
-    const data = await userDao.retrieveUser(validatedUsername);
 
-    if (data.Item) {
-        if (await bcrypt.compare(data.Item.password, password)) {
-            return res.send({
-                message: 'Successful login!',
-                token: await jwtUtil.createToken(data.Item.username, data.Item.role, data.Item.employeeName)
-            });
+    try {
+        const data = await userDao.retrieveUser(validatedUsername);
+
+        if (data.Item) {
+            if (await bcrypt.compare(password, data.Item.password)) {
+                return res.send({
+                    message: 'Successful login!',
+                    token: await jwtUtil.createToken(data.Item.username, data.Item.role, data.Item.employeeName)
+                });
+            } else {
+                res.status(400);
+                return res.send({errorMessage: "Invalid credentials."});
+            }
         } else {
-            res.status(400);
+            res.status(404);
             return res.send({errorMessage: "Invalid credentials."});
         }
-    } else {
-        res.status(404);
-        return res.send({errorMessage: "Invalid credentials."});
+    } catch {
+        logger.error(`ERROR: ${req.method} received to ${req.url}.`);
+        res.status(500);
+        return res.send({
+            serverError: "A server error has occurred."
+        });
     }
 });
 

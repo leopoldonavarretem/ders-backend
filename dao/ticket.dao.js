@@ -26,40 +26,6 @@ function submitTicket(ticketId, amount, description, reimbursementType, title, u
     }).promise();
 }
 
-function retrieveTicketsByReimbursementType(reimbursementType, username) {
-    return docClient.query({
-        TableName: 'ders-tickets',
-        IndexName: 'reimbursementType-index',
-        FilterExpression: '#C = :value2',
-        KeyConditionExpression: '#A = :value1',
-        ExpressionAttributeNames: {
-            '#A': 'reimbursementType',
-            '#C': 'username',
-        },
-        ExpressionAttributeValues: {
-            ':value1': reimbursementType,
-            ':value2': username
-        }
-    }).promise();
-}
-
-function retrieveTicketsByStatusEmployee(status, username) {
-    return docClient.query({
-        TableName: 'ders-tickets',
-        IndexName: 'status-index',
-        FilterExpression: '#C = :value2',
-        KeyConditionExpression: '#A = :value1',
-        ExpressionAttributeNames: {
-            '#A': 'status',
-            '#C': 'username',
-        },
-        ExpressionAttributeValues: {
-            ':value1': status,
-            ':value2': username
-        }
-    }).promise();
-}
-
 function retrieveTicketsByStatus(status) {
     return docClient.query({
         TableName: 'ders-tickets',
@@ -121,11 +87,9 @@ function changeTicketStatus(ticketId, status) {
 
 module.exports = {
     submitTicket,
-    retrieveTicketsByReimbursementType,
     retrieveTicketById,
     retrieveTicketsByEmployee,
     retrieveAllTickets,
     retrieveTicketsByStatus,
     changeTicketStatus,
-    retrieveTicketsByStatusEmployee
 };
