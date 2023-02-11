@@ -51,7 +51,7 @@ router.post('/tickets', getUserInfo, isEmployee, async (req, res) => {
     if (typeof amount !== 'number' || typeof description !== "string" || typeof reimbursementType !== 'string' || typeof title !== 'string') {
         res.status(400);
         return res.send({
-            errorMessage: "Please input A valid amount, description, type and title."
+            errorMessage: "Please input a valid amount, description, type and title."
         });
     }
 

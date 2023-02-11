@@ -10,20 +10,41 @@ router.get('/tickets', getUserInfo, isManager, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     const status = req.query.status;
 
-    try {
-        if (status) {
-            const data = await ticketDao.retrieveTicketsByStatus(status);
-            res.send(data.Items);
-        } else {
-            const data = await ticketDao.retrieveAllTickets();
-            res.send(data.Items);
+    if (status) {
+        if (status !== 'pending' && status !== 'approved' && status !== 'denied') {
+            res.status(400);
+            return res.send({
+                errorMessage: 'Please input a valid ticket status.'
+            });
         }
 
-    } catch (err) {
-        res.status(500);
-        res.send({"message": "Server error."});
+        try {
+            const data = await ticketDao.retrieveTicketsByStatus(status);
+            if (data.Items.length) {
+                return res.send(data.Items);
+            } else {
+                return res.status(400).send({message: `There are no tickets with ${status} status.`});
+            }
+
+        } catch {
+            logger.error(`ERROR: ${req.method} received to ${req.url}.`);
+            res.status(500);
+            return res.send({errormessage: "Server error."});
+        }
     }
 
+    try {
+        const data = await ticketDao.retrieveAllTickets();
+        if (data.Items.length) {
+            res.send(data.Items);
+        } else {
+            res.status(404).send({message: 'There are no tickets.'});
+        }
+    } catch (err) {
+        logger.error(`ERROR: ${req.method} received to ${req.url}.`);
+        res.status(500);
+        res.send({errormessage: "Server error."});
+    }
 });
 
 router.get('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
@@ -32,10 +53,15 @@ router.get('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
 
     try {
         const data = await ticketDao.retrieveTicketById(ticketId);
-        res.send(data.Item);
+        if (data.Item) {
+            return res.send(data.Item);
+        } else {
+            return res.status(404).send({message: 'Ticket does not exist.'});
+        }
     } catch {
+        logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         res.status(500);
-        res.send({"message": "Server error."});
+        return res.send({errorMessage: "Server error."});
     }
 });
 

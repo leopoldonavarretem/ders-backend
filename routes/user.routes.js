@@ -14,7 +14,7 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
         res.send({"message": "Information updated successfully."});
 
     } catch (err) {
-        res.status(500);
+        return res.status(500).send({errorMessage:'Server Error.'})
     }
 });
 

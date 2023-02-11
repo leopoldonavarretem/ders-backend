@@ -9,13 +9,14 @@ const employeeRoutes = require('./employee.routes');
 const managerRoutes = require('./manager.routes');
 const userRoutes = require('./user.routes');
 
-//Routes imports
+//Index route
 router.get('/', (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
 
     return res.send({message: "Welcome to the DERS server."});
 });
 
+//All routes
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/employee', employeeRoutes);
