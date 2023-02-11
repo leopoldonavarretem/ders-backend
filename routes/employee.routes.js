@@ -14,7 +14,6 @@ router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {
         if (data.Items.length) {
             return res.send(data.Items);
         } else {
-            res.status(404);
             return res.send({message: "You have not submitted any tickets."});
         }
     } catch {
