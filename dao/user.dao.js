@@ -36,6 +36,7 @@ function registerUser(userID, username, password, name) {
     }).promise();
 }
 
+//Function to edit a users' information.
 function editUserInformation(userID, newUsername, newPassword, newName, newAddress) {
     return docClient.update({
         TableName: 'ders-users',
@@ -60,8 +61,16 @@ function editUserInformation(userID, newUsername, newPassword, newName, newAddre
     }).promise();
 }
 
+//Function to retrieve all users.
+function retrieveAllUsers() {
+    return docClient.scan({
+        TableName: 'ders-users'
+    }).promise();
+}
+
 module.exports = {
     retrieveUser,
     registerUser,
-    editUserInformation
+    editUserInformation,
+    retrieveAllUsers
 };

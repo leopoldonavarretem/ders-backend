@@ -1,38 +1,38 @@
 //Imports
 const router = require('express').Router();
 const logger = require('../config/logger.config');
-
-//This route sends the menu for the entire route.
-router.get("/", (req, res) => {
-    logger.info(`${req.method} received to ${req.url}.`)
-    const adminIntroMessage = {
-        message: 'You have accessed the /admin endpoint.',
-        routes: [
-            "GET /admin/employees to see all employees.",
-            "POST /admin/employees to create an employee.",
-            "PATCH /admin/:employeeID to edit employee details"
-        ]
-
-    }
-    res.send(adminIntroMessage)
-})
+const userDao = require('../dao/user.dao');
+const isAdmin = require('../middleware/isAdmin');
+const getUserInfo = require('../middleware/getUserInfo');
 
 //This route allows us to see all the employees.
-router.get("/employees", (req, res) => {
+router.get("/employees", getUserInfo, isAdmin, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: "You have accessed the /employees endpoint."})
+    try {
+        const data = await userDao.retrieveAllUsers();
+        if (data.Items.length) {
+            data.Items.forEach((item) => {
+                item.password = null;
+            });
+            return res.send(data.Items);
+        } else {
+            return res.send({message: 'There are no employees.'});
+        }
+    } catch {
+        res.status(500).send({errorMessage: 'Server error.'});
+    }
 });
 
 //This route allows us to create an employee.
-router.post('/employees', (req, res) => {
+router.post('/employees', getUserInfo, isAdmin, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
-    res.send({message: 'You have accessed the /employees endpoint.'})
+    res.send({message: 'You have accessed the /employees endpoint.'});
 });
 
 //This route allows us to edit employee details.
-router.patch('/:employeeId', (req, res) => {
+router.patch('/:employeeId', getUserInfo, isAdmin, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     res.send({message: 'You have accessed the /employeeId endpoint'});
-})
+});
 
 module.exports = router;

@@ -38,9 +38,9 @@ router.get('/tickets', getUserInfo, isManager, async (req, res) => {
         if (data.Items.length) {
             return res.send(data.Items);
         } else {
-            return res.status(404).send({message: 'There are no tickets.'});
+            return res.send({message: 'There are no tickets.'});
         }
-    } catch (err) {
+    } catch {
         logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         res.status(500);
         return res.send({errormessage: "Server error."});
