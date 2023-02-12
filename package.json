@@ -1,23 +1,22 @@
 {
-  "name": "wip-ders-backend",
+  "name": "ders-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "A reimbursement management system backend. Based on Dynamo and Express",
   "main": "server.js",
   "scripts": {
-    "test": "jest",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leopoldonavarretem/wip-ders-backend.git"
+    "url": "git+https://github.com/leopoldonavarretem/ders-backend.git"
   },
   "author": "Leopoldo Navarrete",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/leopoldonavarretem/wip-ders-backend/issues"
+    "url": "https://github.com/leopoldonavarretem/ders-backend/issues"
   },
-  "homepage": "https://github.com/leopoldonavarretem/wip-ders-backend#readme",
+  "homepage": "https://github.com/leopoldonavarretem/ders-backend#readme",
   "dependencies": {
     "aws-sdk": "^2.1298.0",
     "bcrypt": "^5.1.0",
