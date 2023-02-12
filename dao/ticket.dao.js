@@ -7,7 +7,7 @@ require('../config/dynamo.config');
 //Instantiate docClient.
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-function submitTicket(ticketId, amount, description, reimbursementType, title, username, name) {
+function submitTicket(ticketId, amount, description, reimbursementType, title, userID, name) {
     const date = new Date();
     return docClient.put({
         TableName: "ders-tickets",
@@ -19,7 +19,7 @@ function submitTicket(ticketId, amount, description, reimbursementType, title, u
             "reimbursementType": reimbursementType,
             "status": "pending",
             "employeeName": name,
-            "username": username,
+            "userID": userID,
             "dateSubmitted": date.toUTCString()
         }
 
@@ -49,15 +49,15 @@ function retrieveTicketById(ticketId) {
     }).promise();
 }
 
-function retrieveTicketsByEmployee(username) {
+function retrieveTicketsByEmployee(userID) {
     return docClient.scan({
         TableName: 'ders-tickets',
         FilterExpression: '#a = :value',
         ExpressionAttributeNames: {
-            '#a': "username"
+            '#a': "userID"
         },
         ExpressionAttributeValues: {
-            ':value': username
+            ':value': userID
         }
     }).promise();
 }

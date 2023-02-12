@@ -7,11 +7,11 @@ const userDao = require("../dao/user.dao");
 
 router.patch('/', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}`);
-    const {newPassword, newName, newAddress} = req.body;
+    const {newPassword, newName, newAddress, newUsername} = req.body;
 
-    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof newAddress !== 'object') {
+    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof newAddress !== 'object' || typeof newUsername !== 'string') {
         return res.status(400).send({
-            errorMessage: 'Please input a valid password, name and address type.'
+            errorMessage: 'Please input a valid password, name, username and address type.'
         });
     }
 
@@ -24,7 +24,7 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
 
 
     try {
-        await userDao.editUserInformation(req.user.username, newPassword, newName, newAddress);
+        await userDao.editUserInformation(req.user.userId, newUsername, newPassword, newName, newAddress);
         res.send({"message": "Information updated successfully."});
 
     } catch (err) {

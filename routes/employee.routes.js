@@ -10,7 +10,7 @@ const uuid = require('uuid');
 router.get('/tickets', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}.`);
     try {
-        const data = await ticketDao.retrieveTicketsByEmployee(req.user.username);
+        const data = await ticketDao.retrieveTicketsByEmployee(req.user.userID);
         if (data.Items.length) {
             return res.send(data.Items);
         } else {
@@ -29,12 +29,12 @@ router.get('/tickets/:ticketId', getUserInfo, isEmployee, async (req, res) => {
         const data = await ticketDao.retrieveTicketById(req.params['ticketId']);
         if (!data.Item) {
             return res.status(404).send({errorMessage: "Ticket does not exist."});
-        } else if (data.Item.username !== req.user.username) {
+        } else if (data.Item.userID !== req.user.userID) {
             return res.send({errorMessage: "Not authorized to view this ticket."});
         } else {
             return res.send(data.Item);
         }
-    } catch (err) {
+    } catch {
         logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         return res.status(500).send({serverError: "A server error has occurred."});
     }
@@ -68,10 +68,10 @@ router.post('/tickets', getUserInfo, isEmployee, async (req, res) => {
     }
     try {
         const ticketId = uuid.v4().toString();
-        await ticketDao.submitTicket(ticketId, amount, description, validatedReimbursementType, title, user.username, user.employeeName);
+        await ticketDao.submitTicket(ticketId, amount, description, validatedReimbursementType, title, user.userID, user.employeeName);
         res.status(201);
         return res.send({message: "Ticket created successfully", "ticketId": ticketId});
-    } catch (err) {
+    } catch {
         logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         return res.status(500).send({serverError: "A server error has occurred."});
     }
