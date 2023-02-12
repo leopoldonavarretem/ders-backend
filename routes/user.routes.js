@@ -4,6 +4,7 @@ const logger = require('../config/logger.config');
 const getUserInfo = require("../middleware/getUserInfo");
 const isEmployee = require("../middleware/isEmployee");
 const userDao = require("../dao/user.dao");
+const bcrypt = require("bcrypt");
 
 router.patch('/', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}`);
@@ -22,12 +23,16 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
         return res.send({errorMessage: "Password must have at least eight characters, contain one number, one lowercase letter, and one uppercase letter. "});
     }
 
+    const validatedPassword = await bcrypt.hash(newPassword, 10);
+    const validatedUsername = newUsername.toLowerCase();
+    const validatedName = newName.toLowerCase();
 
     try {
-        await userDao.editUserInformation(req.user.userId, newUsername, newPassword, newName, newAddress);
-        res.send({"message": "Information updated successfully."});
+        await userDao.editUserInformation(req.user.userID, validatedUsername, validatedPassword, validatedName, newAddress);
+        return res.send({"message": "Information updated successfully."});
 
-    } catch (err) {
+    } catch {
+        logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         return res.status(500).send({errorMessage: 'Server Error.'});
     }
 });

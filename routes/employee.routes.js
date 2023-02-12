@@ -67,7 +67,7 @@ router.post('/tickets', getUserInfo, isEmployee, async (req, res) => {
         });
     }
     try {
-        const ticketId = uuid.v4().toString();
+        const ticketId = uuid.v4();
         await ticketDao.submitTicket(ticketId, amount, description, validatedReimbursementType, title, user.userID, user.employeeName);
         res.status(201);
         return res.send({message: "Ticket created successfully", "ticketId": ticketId});

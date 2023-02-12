@@ -29,6 +29,7 @@ router.post('/signup', async (req, res) => {
 
     const validatedPassword = await bcrypt.hash(password, 10);
     const validatedUsername = username.toLowerCase();
+    const validatedName = name.toLowerCase();
 
     try {
         const data = await userDao.retrieveUser(username);
@@ -39,7 +40,7 @@ router.post('/signup', async (req, res) => {
             });
         } else {
             const userID = uuid.v4();
-            await userDao.registerUser(userID, validatedUsername, validatedPassword, name);
+            await userDao.registerUser(userID, validatedUsername, validatedPassword, validatedName);
 
             return res.send({
                 message: "User successfully registered."

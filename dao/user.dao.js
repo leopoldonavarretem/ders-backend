@@ -45,16 +45,16 @@ function editUserInformation(userID, newUsername, newPassword, newName, newAddre
         },
         UpdateExpression: 'set #a = :value1, #b = :value2, #c = :value3, #d = :value4',
         ExpressionAttributeNames: {
-            "#a": 'password',
-            "#b": 'employeeName',
+            "#a": "password",
+            "#b": "employeeName",
             "#c": "address",
-            '#d': "username"
+            "#d": "username"
         },
         ExpressionAttributeValues: {
             ":value1": newPassword,
             ":value2": newName,
             ":value3": newAddress,
-            'value4': newUsername
+            ":value4": newUsername
         },
 
         ReturnValues: "UPDATED_NEW"
@@ -68,9 +68,38 @@ function retrieveAllUsers() {
     }).promise();
 }
 
+//Function to change an employee role.
+function changeEmployeeRole(userID, role) {
+    return docClient.update({
+        TableName: 'ders-users',
+        Key: {
+            "userID": userID
+        },
+        UpdateExpression: 'set #a = :value1',
+        ExpressionAttributeNames: {
+            "#a": "role",
+        },
+        ExpressionAttributeValues: {
+            ":value1": role,
+        }
+    }).promise();
+}
+
+//Function to retrieve a user by ID.
+function retrieveUserByID(userID) {
+    return docClient.get({
+        TableName: 'ders-users',
+        Key: {
+            'userID': userID
+        }
+    }).promise();
+}
+
 module.exports = {
     retrieveUser,
     registerUser,
     editUserInformation,
-    retrieveAllUsers
+    retrieveAllUsers,
+    changeEmployeeRole,
+    retrieveUserByID
 };
