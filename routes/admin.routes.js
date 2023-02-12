@@ -34,6 +34,13 @@ router.post('/employees', getUserInfo, isAdmin, async (req, res) => {
         return res.status(400).send({errorMessage: 'Please input a valid employee name, password, role and username type'});
     }
 
+    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
+
+    if (!regex.test(password)) {
+        res.status(400);
+        return res.send({errorMessage: "Password must have at least eight characters, contain one number, one lowercase letter, and one uppercase letter. "});
+    }
+
     const validatedUsername = username.toLowerCase();
     const validatedPassword = await bcrypt.hash(password, 10);
     const validatedName = employeeName.toLowerCase();
@@ -56,7 +63,7 @@ router.patch('/employees/:userID', getUserInfo, isAdmin, async (req, res) => {
     const {userID} = req.params;
 
     if (role !== 'manager' && role !== 'employee') {
-        res.status(400).send({
+        return res.status(400).send({
             errorMessage: 'Role can only be manager or employee.'
         });
     }

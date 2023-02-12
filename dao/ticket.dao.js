@@ -4,13 +4,14 @@ const AWS = require('aws-sdk');
 //AWS config
 require('../config/dynamo.config');
 
-//Instantiate docClient.
+//Constants
 const docClient = new AWS.DynamoDB.DocumentClient();
+const table = process.env.TICKETSTABLE;
 
 function submitTicket(ticketId, amount, description, reimbursementType, title, userID, name) {
     const date = new Date();
     return docClient.put({
-        TableName: "ders-tickets",
+        TableName: table,
         Item: {
             "title": title,
             "ticketId": ticketId,
@@ -42,7 +43,7 @@ function retrieveTicketsByStatus(status) {
 
 function retrieveTicketById(ticketId) {
     return docClient.get({
-        TableName: 'ders-tickets',
+        TableName: table,
         Key: {
             'ticketId': ticketId
         }
@@ -51,7 +52,7 @@ function retrieveTicketById(ticketId) {
 
 function retrieveTicketsByEmployee(userID) {
     return docClient.scan({
-        TableName: 'ders-tickets',
+        TableName: table,
         FilterExpression: '#a = :value',
         ExpressionAttributeNames: {
             '#a': "userID"
@@ -64,14 +65,14 @@ function retrieveTicketsByEmployee(userID) {
 
 function retrieveAllTickets() {
     return docClient.scan({
-        TableName: 'ders-tickets',
+        TableName: table,
 
     }).promise();
 }
 
 function changeTicketStatus(ticketId, status) {
     return docClient.update({
-        TableName: 'ders-tickets',
+        TableName: table,
         Key: {
             "ticketId": ticketId
         },

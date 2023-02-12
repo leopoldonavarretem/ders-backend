@@ -4,13 +4,14 @@ const AWS = require('aws-sdk');
 //AWS config
 require('../config/dynamo.config');
 
-//Instantiate docClient.
+//Constants.
 const docClient = new AWS.DynamoDB.DocumentClient();
+const table = process.env.USERSTABLE;
 
 //Function to retrieve a User.
 function retrieveUser(username) {
     return docClient.scan({
-        TableName: 'ders-users',
+        TableName: table,
         FilterExpression: '#a = :value',
         ExpressionAttributeNames: {
             '#a': "username"
@@ -25,7 +26,7 @@ function retrieveUser(username) {
 //Function register a user.
 function registerUser(userID, username, password, name) {
     return docClient.put({
-        TableName: "ders-users",
+        TableName: table,
         Item: {
             "userID": userID,
             "username": username,
@@ -39,7 +40,7 @@ function registerUser(userID, username, password, name) {
 //Function to edit a users' information.
 function editUserInformation(userID, newUsername, newPassword, newName, newAddress) {
     return docClient.update({
-        TableName: 'ders-users',
+        TableName: table,
         Key: {
             userID
         },
@@ -64,14 +65,14 @@ function editUserInformation(userID, newUsername, newPassword, newName, newAddre
 //Function to retrieve all users.
 function retrieveAllUsers() {
     return docClient.scan({
-        TableName: 'ders-users'
+        TableName: table
     }).promise();
 }
 
 //Function to change an employee role.
 function changeEmployeeRole(userID, role) {
     return docClient.update({
-        TableName: 'ders-users',
+        TableName: table,
         Key: {
             "userID": userID
         },
@@ -88,7 +89,7 @@ function changeEmployeeRole(userID, role) {
 //Function to retrieve a user by ID.
 function retrieveUserByID(userID) {
     return docClient.get({
-        TableName: 'ders-users',
+        TableName: table,
         Key: {
             'userID': userID
         }

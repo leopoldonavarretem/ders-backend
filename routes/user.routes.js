@@ -10,7 +10,7 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}`);
     const {newPassword, newName, newAddress, newUsername} = req.body;
 
-    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof newAddress !== 'object' || typeof newUsername !== 'string') {
+    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof newAddress !== 'object' || newAddress === null || typeof newUsername !== 'string') {
         return res.status(400).send({
             errorMessage: 'Please input a valid password, name, username and address type.'
         });
