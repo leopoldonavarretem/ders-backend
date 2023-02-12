@@ -36,14 +36,14 @@ router.get('/tickets', getUserInfo, isManager, async (req, res) => {
     try {
         const data = await ticketDao.retrieveAllTickets();
         if (data.Items.length) {
-            res.send(data.Items);
+            return res.send(data.Items);
         } else {
-            res.status(404).send({message: 'There are no tickets.'});
+            return res.status(404).send({message: 'There are no tickets.'});
         }
     } catch (err) {
         logger.error(`ERROR: ${req.method} received to ${req.url}.`);
         res.status(500);
-        res.send({errormessage: "Server error."});
+        return res.send({errormessage: "Server error."});
     }
 });
 
@@ -72,24 +72,28 @@ router.patch('/tickets/:ticketId', getUserInfo, isManager, async (req, res) => {
     try {
         if (status !== 'approved' && status !== 'denied') {
             res.status(400);
-            res.send({
-                "message": "Please approve or deny ticket."
+            return res.send({
+                message: "Please approve or deny ticket."
             });
         } else {
             const data = await ticketDao.retrieveTicketById(ticketId);
             if (data.Item.status !== "pending") {
                 res.status(400);
-                res.send({
-                    "message": "This ticket has already been denied or approved."
+                return res.send({
+                    message: "This ticket has already been denied or approved."
                 });
             } else {
                 await ticketDao.changeTicketStatus(ticketId, req.body.status);
-                res.send({"message": `Ticket has been ${status}.`});
+                return res.send({message: `Ticket has been ${status}.`});
             }
         }
-    } catch (err) {
-        console.log(err);
+    } catch {
+        logger.error(`ERROR: ${req.method} received to ${req.url}.`);
+        return res.status(500).send({
+            errorMessage: 'Server error'
+        });
     }
-});
+})
+;
 
 module.exports = router;

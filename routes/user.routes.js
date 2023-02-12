@@ -9,10 +9,10 @@ router.patch('/', getUserInfo, isEmployee, async (req, res) => {
     logger.info(`${req.method} received to ${req.url}`);
     const {newPassword, newName, newAddress} = req.body;
 
-    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof  newAddress !== 'string'){
+    if (typeof newPassword !== 'string' || typeof newName !== 'string' || typeof newAddress !== 'object') {
         return res.status(400).send({
             errorMessage: 'Please input a valid password, name and address type.'
-        })
+        });
     }
 
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
