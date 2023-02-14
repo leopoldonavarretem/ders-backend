@@ -2,7 +2,7 @@
 const AWS = require('aws-sdk');
 
 AWS.config.update({
-    region: 'us-west-1'
+    region: process.env.AMAZONREGION
 });
 
 module.exports = AWS;
